@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escenario de Terror con Colibrí y Movimiento</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="horrorCanvas"></canvas>
+    <script>
+        // Obtener el elemento canvas y su contexto de dibujo 2D
+        const canvas = document.getElementById('horrorCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Ajustar el tamaño del canvas para que ocupe toda la ventana
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Coordenadas iniciales de la imagen del colibrí
+        let x = canvas.width / 2;
+        let y = canvas.height / 2;
+        const imgWidth = 100;
+        const imgHeight = 100;
+
+        // Definir las propiedades de la luna
+        const moon = {
+            x: canvas.width - 150,  // Posición x
+            y: 100,                 // Posición y
+            radius: 60              // Radio
+        };
+
+        // Definir las propiedades de los árboles
+        const trees = [
+            { x: 100, y: canvas.height - 200, width: 50, height: 200 },
+            { x: 300, y: canvas.height - 250, width: 60, height: 250 },
+            { x: 500, y: canvas.height - 150, width: 40, height: 150 }
+        ];
+
+        // Array para almacenar la neblina
+        const fog = [];
+
+        // Crear varias partículas de neblina con propiedades aleatorias
+        for (let i = 0; i < 50; i++) {
+            fog.push({
+                x: Math.random() * canvas.width,   // Posición x aleatoria
+                y: Math.random() * canvas.height,  // Posición y aleatoria
+                radius: Math.random() * 30 + 20,   // Radio aleatorio
+                speed: Math.random() * 0.5 + 0.2   // Velocidad aleatoria
+            });
+        }
+
+        // Función para dibujar la luna
+        function drawMoon() {
+            ctx.beginPath();
+            ctx.arc(moon.x, moon.y, moon.radius, 0, Math.PI * 2, false);
+            ctx.fillStyle = 'lightgrey';
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Función para dibujar los árboles
+        function drawTrees() {
+            ctx.fillStyle = 'black';
+            for (let tree of trees) {
+                ctx.fillRect(tree.x, tree.y, tree.width, tree.height);
+                ctx.beginPath();
+                ctx.moveTo(tree.x + tree.width / 2, tree.y - 100);
+                ctx.lineTo(tree.x, tree.y);
+                ctx.lineTo(tree.x + tree.width, tree.y);
+                ctx.fill();
+            }
+        }
+
+        // Función para dibujar la neblina
+        function drawFog() {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            for (let f of fog) {
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2, false);
+                ctx.fill();
+            }
+        }
+
+        // Función para actualizar la posición de la neblina
+        function updateFog() {
+            for (let f of fog) {
+                f.x += f.speed;  // Mover la neblina hacia la derecha
+                if (f.x > canvas.width) {  // Si la neblina sale del canvas, reiniciarla a la izquierda
+                    f.x = -f.radius;
+                }
+            }
+        }
+
+        // Función para dibujar la imagen del colibrí
+        const dibujo = new Image();
+        dibujo.src = 'imagen.png';
+        
+        function drawColibri() {
+            ctx.drawImage(dibujo, x - imgWidth / 2, y - imgHeight / 2, imgWidth, imgHeight);
+        }
+
+        // Función de animación principal
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);  // Limpiar el canvas
+            ctx.fillStyle = 'darkslategray';  // Color de fondo
+            ctx.fillRect(0, 0, canvas.width, canvas.height);  // Dibujar el fondo
+
+            drawMoon();  // Dibujar la luna
+            drawTrees();  // Dibujar los árboles
+            drawFog();  // Dibujar la neblina
+            updateFog();  // Actualizar la posición de la neblina
+            drawColibri(); // Dibujar la imagen del colibrí
+
+            requestAnimationFrame(animate);  // Llamar a la función de animación en el próximo frame
+        }
+
+        // Mover la imagen del colibrí según las teclas de flecha
+        document.addEventListener("keydown", (event) =>{
+            switch (event.key) {
+                case "ArrowUp":
+                    y -= 10;
+                    break;
+                case "ArrowDown":
+                    y += 10;
+                    break;
+                case "ArrowLeft":
+                    x -= 10;
+                    break;
+                case "ArrowRight":
+                    x += 10;
+                    break;
+            }
+            drawColibri();
+        });
+
+        // Iniciar la animación cuando la imagen se haya cargado
+        dibujo.onload = function() {
+            animate();
+        };
+    </script>
+</body>
+</html>
